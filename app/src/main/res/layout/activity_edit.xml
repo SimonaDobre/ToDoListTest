@@ -1,54 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".EditActivity">
 
     <EditText
-        android:id="@+id/inputTaskEditText"
+        android:id="@+id/editTaskEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
         android:ems="10"
-        android:hint="adauga task"
         android:inputType="textPersonName" />
 
     <EditText
-        android:id="@+id/inputPriorityEditText"
+        android:id="@+id/editPriorityEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/inputTaskEditText"
         android:ems="10"
-        android:hint="adauga prioritatea: 0, 1 sau 2"
-        android:inputType="number" />
+        android:inputType="textPersonName" />
 
     <EditText
-        android:id="@+id/deadLineEditText"
+        android:id="@+id/editDeadLineEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/inputPriorityEditText"
         android:ems="10"
         android:focusable="false"
-        android:hint="deadLine"
         android:inputType="textPersonName" />
 
     <Button
-        android:id="@+id/addButton"
+        android:id="@+id/saveModificationsButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/deadLineEditText"
-        android:text="adauga task"
+        android:text="save"
         app:backgroundTint="#4CAF50" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/tasksListRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/addButton" />
-</RelativeLayout>
+</LinearLayout>

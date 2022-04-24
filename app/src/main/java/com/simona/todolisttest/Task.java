@@ -4,10 +4,14 @@ public class Task {
 
     private String task;
     private int priority;
+    private String deadLine;
+    boolean accomplished;
 
-    public Task(String task, int priority) {
+    public Task(String task, int priority, String deadLine, boolean accomplished) {
         this.task = task;
         this.priority = priority;
+        this.deadLine = deadLine;
+        this.accomplished = accomplished;
     }
 
     public String getTask() {
@@ -26,17 +30,24 @@ public class Task {
         this.priority = priority;
     }
 
-    public void changePriority(int newPriority) {
-        priority = newPriority;
+    public String getDeadLine() {
+        return deadLine;
     }
 
-    public void addTask() {
-        // Nu stiu cum pot adauga un task la array-ul de task-uri definit in MainActivity,
-        // folosind aceasta metoda - addTask - din clasa Task.
-        // Array-ul de task-uri e obligatoriu sa fie in MainActivity pentru ca acolo am nevoie de el
-        // pentru a-l afisa in tasksListRecyclerView, pe masura ce adaug noi task-uri,
-        // sau pentru a edita sau a sterge anumite task-uri.
+    public void setDeadLine(String deadLine) {
+        this.deadLine = deadLine;
     }
 
+    public boolean isAccomplished() {
+        return accomplished;
+    }
+
+    public void setAccomplished(boolean accomplished) {
+        this.accomplished = accomplished;
+    }
+
+    public void changeAccomplishment(){
+        accomplished = !accomplished;
+    }
 
 }
