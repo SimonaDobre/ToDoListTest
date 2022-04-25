@@ -43,6 +43,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/deadLineEditText"
+        android:layout_marginStart="6dp"
+        android:layout_marginLeft="6dp"
         android:text="adauga task"
         app:backgroundTint="#4CAF50" />
 
@@ -50,5 +52,43 @@
         android:id="@+id/tasksListRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/addButton" />
+        android:layout_below="@id/buttonsLinearlayout" />
+
+    <LinearLayout
+        android:id="@+id/buttonsLinearlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/addButton"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/showEmergenciesButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginLeft="6dp"
+            android:layout_marginEnd="6dp"
+            android:layout_marginRight="6dp"
+            android:text="urgentele"
+            app:backgroundTint="#FF5722" />
+
+        <Button
+            android:id="@+id/orderTasksButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ordoneaza"
+            app:backgroundTint="#2196F3" />
+
+        <Button
+            android:id="@+id/showAllButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginLeft="6dp"
+            android:layout_marginEnd="6dp"
+            android:layout_marginRight="6dp"
+            android:layout_weight="1"
+            android:text="arata toate"
+            app:backgroundTint="#8BC34A" />
+    </LinearLayout>
 </RelativeLayout>

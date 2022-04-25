@@ -24,22 +24,24 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements InterfaceEditTask, View.OnClickListener {
 
     EditText inputTaskED, inputPriorityED, deadLineED;
-    Button addBtn;
+    Button addBtn, showEmergenciesBtn, orderByDeadLineBtn, showAllBtn;
     RecyclerView tasksListRV;
-    ArrayList<Task> arrayTasks;
+    ArrayList<Task> arrayTasksAll, arrayTaskSelected;
     MyAdapter myAdapter;
     String deadlineDate = "";
 
     public static final String TASK_FOR_EDIT = "tfe";
     public static final String DEADLINE_FOR_EDIT = "dlfe";
     public static final int PRIORITY_FOR_EDIT = 5;
-    public static final int RESULT_AFTER_EDIT = 30;
+    // public static final int RESULT_AFTER_EDIT = 30;
     int positionForEdit;
+    boolean emergencyTasksListActiveShowing;
 
     ActivityResultLauncher<Intent> launcherToEditare = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -58,7 +60,18 @@ public class MainActivity extends AppCompatActivity implements InterfaceEditTask
 
         initViews();
         swipeToDelete();
+//        populareArrayPentruTest();
+    }
 
+    void populareArrayPentruTest() {
+        arrayTasksAll.add(new Task("task 0", 0, "26-04-2022", false));
+        arrayTasksAll.add(new Task("task 1", 1, "05-05-2022", false));
+        arrayTasksAll.add(new Task("task 2", 2, "25-04-2022", false));
+        arrayTasksAll.add(new Task("task 3", 0, "29-04-2022", false));
+        arrayTasksAll.add(new Task("task 4", 0, "25-06-2022", false));
+        arrayTasksAll.add(new Task("task 5", 2, "30-04-2022", false));
+        arrayTasksAll.add(new Task("task 6", 0, "28-04-2022", false));
+        arrayTasksAll.add(new Task("task 7", 1, "25-05-2022", false));
     }
 
     void resultReceivedFromEdit(ActivityResult resultReceived) {
@@ -68,7 +81,12 @@ public class MainActivity extends AppCompatActivity implements InterfaceEditTask
                 String modifiedTask = receivedIntentAfterEdit.getStringExtra(EditActivity.NEW_TASK);
                 String modifiedDeadline = receivedIntentAfterEdit.getStringExtra(EditActivity.NEW_DEADLINE);
                 int modifiedPriority = receivedIntentAfterEdit.getIntExtra(String.valueOf(EditActivity.NEW_PRIORITY), 0);
-                Task editedTask = arrayTasks.get(positionForEdit);
+                Task editedTask;
+                if (emergencyTasksListActiveShowing) {
+                    editedTask = arrayTaskSelected.get(positionForEdit);
+                } else {
+                    editedTask = arrayTasksAll.get(positionForEdit);
+                }
                 editedTask.setTask(modifiedTask);
                 editedTask.setDeadLine(modifiedDeadline);
                 editedTask.setPriority(modifiedPriority);
@@ -80,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements InterfaceEditTask
 
     void addTaskToList() {
         String task = inputTaskED.getText().toString().trim();
-        if (task.equals("") || task.equals(null)){
+        if (task.equals("") || task.equals(null)) {
             Toast.makeText(MainActivity.this, "campul task nu poate fi null", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -98,17 +116,17 @@ public class MainActivity extends AppCompatActivity implements InterfaceEditTask
             Toast.makeText(MainActivity.this, "se accepta doar 0 sau 1 sau 2", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (deadlineDate.equals("") || deadlineDate.equals(null)){
+        if (deadlineDate.equals("") || deadlineDate.equals(null)) {
             Calendar cal = Calendar.getInstance();
             Date today = cal.getTime();
             cal.add(Calendar.DAY_OF_MONTH, 1);
             Date tommorow = cal.getTime();
             deadlineDate = tommorow.toString();
-         }
+        }
 
         Task taskObject = new Task(task, priority, deadlineDate, false);
-        arrayTasks.add(taskObject);
-        myAdapter.notifyItemInserted(arrayTasks.size());
+        arrayTasksAll.add(taskObject);
+        myAdapter.notifyItemInserted(arrayTasksAll.size());
         inputTaskED.setText(null);
         inputTaskED.requestFocus();
         inputPriorityED.setText(null);
@@ -125,8 +143,13 @@ public class MainActivity extends AppCompatActivity implements InterfaceEditTask
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int lineToBeDeleted = viewHolder.getAdapterPosition();
-                // int pozitia = arrayTasks.indexOf(lineToBeDeleted);
-                arrayTasks.remove(lineToBeDeleted);
+                if (emergencyTasksListActiveShowing) {
+                    Task taskToBeDeleted = arrayTaskSelected.get(lineToBeDeleted);
+                    arrayTaskSelected.remove(lineToBeDeleted);
+                    arrayTasksAll.remove(taskToBeDeleted);
+                } else {
+                    arrayTasksAll.remove(lineToBeDeleted);
+                }
                 // myAdapter.notifyItemRemoved(arrayTasks.indexOf(pozitia));
                 myAdapter.notifyDataSetChanged();
                 tasksListRV.setAdapter(myAdapter);
@@ -142,10 +165,18 @@ public class MainActivity extends AppCompatActivity implements InterfaceEditTask
         addBtn.setOnClickListener(this);
         deadLineED = findViewById(R.id.deadLineEditText);
         deadLineED.setOnClickListener(this);
+        showEmergenciesBtn = findViewById(R.id.showEmergenciesButton);
+        showEmergenciesBtn.setOnClickListener(this::onClick);
+        orderByDeadLineBtn = findViewById(R.id.orderTasksButton);
+        orderByDeadLineBtn.setOnClickListener(this::onClick);
+        showAllBtn = findViewById(R.id.showAllButton);
+        showAllBtn.setOnClickListener(this::onClick);
+
+        arrayTaskSelected = new ArrayList<>();
 
         tasksListRV = findViewById(R.id.tasksListRecyclerView);
-        arrayTasks = new ArrayList<>();
-        myAdapter = new MyAdapter(this, arrayTasks, this);
+        arrayTasksAll = new ArrayList<>();
+        myAdapter = new MyAdapter(this, arrayTasksAll, this);
         tasksListRV.setLayoutManager(new LinearLayoutManager(this));
         tasksListRV.setAdapter(myAdapter);
 
@@ -155,18 +186,31 @@ public class MainActivity extends AppCompatActivity implements InterfaceEditTask
 
     @Override
     public void editTask(int position) {
-        Task taskToBeEdited = arrayTasks.get(position);
-        positionForEdit = position;
         Intent intentToEditActivity = new Intent(MainActivity.this, EditActivity.class);
-        intentToEditActivity.putExtra(TASK_FOR_EDIT, taskToBeEdited.getTask());
-        intentToEditActivity.putExtra(String.valueOf(PRIORITY_FOR_EDIT), taskToBeEdited.getPriority());
-        intentToEditActivity.putExtra(DEADLINE_FOR_EDIT, taskToBeEdited.getDeadLine());
+        if (emergencyTasksListActiveShowing) {
+            Task taskToBeEdited = arrayTaskSelected.get(position);
+            positionForEdit = position;
+            intentToEditActivity.putExtra(TASK_FOR_EDIT, taskToBeEdited.getTask());
+            intentToEditActivity.putExtra(String.valueOf(PRIORITY_FOR_EDIT), taskToBeEdited.getPriority());
+            intentToEditActivity.putExtra(DEADLINE_FOR_EDIT, taskToBeEdited.getDeadLine());
+        } else {
+            Task taskToBeEdited = arrayTasksAll.get(position);
+            positionForEdit = position;
+            intentToEditActivity.putExtra(TASK_FOR_EDIT, taskToBeEdited.getTask());
+            intentToEditActivity.putExtra(String.valueOf(PRIORITY_FOR_EDIT), taskToBeEdited.getPriority());
+            intentToEditActivity.putExtra(DEADLINE_FOR_EDIT, taskToBeEdited.getDeadLine());
+        }
         launcherToEditare.launch(intentToEditActivity);
     }
 
     @Override
     public void solvedTask(int position) {
-        Task accomplishedTask = arrayTasks.get(position);
+        Task accomplishedTask;
+        if (emergencyTasksListActiveShowing) {
+            accomplishedTask = arrayTaskSelected.get(position);
+        } else {
+            accomplishedTask = arrayTasksAll.get(position);
+        }
         accomplishedTask.changeAccomplishment();
         myAdapter.notifyDataSetChanged();
         tasksListRV.setAdapter(myAdapter);
@@ -190,6 +234,34 @@ public class MainActivity extends AppCompatActivity implements InterfaceEditTask
         dpd.show();
     }
 
+    void showOnlyEmergencyTasks() {
+        emergencyTasksListActiveShowing = true;
+        arrayTaskSelected.clear();
+        for (Task t : arrayTasksAll) {
+            if (t.getPriority() == 0) {
+                arrayTaskSelected.add(t);
+            }
+        }
+        myAdapter = new MyAdapter(this, arrayTaskSelected, this);
+        tasksListRV.setAdapter(myAdapter);
+    }
+
+    void showAllTasks() {
+        emergencyTasksListActiveShowing = false;
+        myAdapter = new MyAdapter(this, arrayTasksAll, this);
+        tasksListRV.setAdapter(myAdapter);
+    }
+
+    void sortBy() {
+        if (emergencyTasksListActiveShowing) {
+            Collections.sort(arrayTaskSelected);
+        } else {
+            Collections.sort(arrayTasksAll);
+        }
+        myAdapter.notifyDataSetChanged();
+        tasksListRV.setAdapter(myAdapter);
+    }
+
     @Override
     public void onClick(View view) {
         int clickedID = view.getId();
@@ -199,6 +271,15 @@ public class MainActivity extends AppCompatActivity implements InterfaceEditTask
                 break;
             case R.id.deadLineEditText:
                 pickDeadlineDate();
+                break;
+            case R.id.showEmergenciesButton:
+                showOnlyEmergencyTasks();
+                break;
+            case R.id.orderTasksButton:
+                sortBy();
+                break;
+            case R.id.showAllButton:
+                showAllTasks();
                 break;
             default:
                 return;

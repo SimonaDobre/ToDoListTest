@@ -84,6 +84,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             holder.priorityTV.setTextColor(Color.RED);
         }
         holder.deadLineTV.setText(currentTask.getDeadLine());
+
         if (currentTask.isAccomplished()){
             holder.taskTV.setPaintFlags(holder.taskTV.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             holder.deadLineTV.setPaintFlags(holder.deadLineTV.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);

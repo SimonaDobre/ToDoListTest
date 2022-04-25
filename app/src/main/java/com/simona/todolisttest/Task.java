@@ -1,6 +1,10 @@
 package com.simona.todolisttest;
 
-public class Task {
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class Task implements Comparable {
 
     private String task;
     private int priority;
@@ -50,4 +54,17 @@ public class Task {
         accomplished = !accomplished;
     }
 
+    @Override
+    public int compareTo(Object o) {
+        Task t = (Task) o;
+        SimpleDateFormat transformStringToData = new SimpleDateFormat("dd-MM-yyyy");
+        Date d1 = null, d2 = null;
+        try {
+            d1 = transformStringToData.parse(deadLine);
+            d2 = transformStringToData.parse(t.getDeadLine());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return d1.compareTo(d2);
+    }
 }
